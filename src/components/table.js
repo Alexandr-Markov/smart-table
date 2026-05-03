@@ -12,17 +12,18 @@ export function initTable(settings, onAction) {
   const root = cloneTemplate(tableTemplate);
 
   // @todo: #1.2 — вывести дополнительные шаблоны до и после таблицы
-
-  before.reverse().forEach(before => {                           
-    root[before] = cloneTemplate(before);            
-    root.container.prepend(root[before].container);    
-}); 
-
-  after.forEach(after => {                            
-    root[after] = cloneTemplate(after);            
-    root.container.append(root[after].container);    
-}); 
-
+  if (before) {
+    before.reverse().forEach(beforeName => {
+      root[beforeName] = cloneTemplate(beforeName);
+      root.container.prepend(root[beforeName].container);
+    });
+  }
+  if (after) {
+  after.forEach(afterName => {
+    root[afterName] = cloneTemplate(afterName);
+    root.container.append(root[afterName].container);
+  });
+  }
   // @todo: #1.3 — обработать события и вызвать onAction()
   root.container.addEventListener('change', () => {
     onAction();
@@ -40,19 +41,22 @@ export function initTable(settings, onAction) {
   const render = (data) => {
     // @todo: #1.1 — преобразовать данные в массив строк на основе шаблона rowTemplate
     const nextRows = data.map(item => {
-      
       const row = cloneTemplate(rowTemplate);
 
-      
       Object.keys(item).forEach(key => {
-        
         if (row.elements[key] !== undefined) {
-          
-          row.elements[key].textContent = item[key];
+          const element = row.elements[key];
+          const value = item[key];
+
+          // Проверяем тип элемента и присваиваем значение соответствующим образом
+          if (element.tagName === 'INPUT' || element.tagName === 'SELECT') {
+            element.value = value;
+          } else {
+            element.textContent = value;
+          }
         }
       });
 
-      
       return row.container;
     });
 
